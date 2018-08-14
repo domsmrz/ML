@@ -38,6 +38,16 @@ labels_train   = labels_train[:150]
 
 
 ### your code goes here
-
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import accuracy_score
+clf = DecisionTreeClassifier()
+clf.fit(features_train, labels_train)
+pred = clf.predict(features_test)
+print('Accuracy: {}'.format(accuracy_score(labels_test, pred)))
+#most_important_id, most_importance = max(enumerate(clf.feature_importances_), key=lambda x: x[1])
+#print("Most important words:").format(vectorizer.get_feature_names()[most_important_id]))
+most_importances = sorted(enumerate(clf.feature_importances_), key=lambda x: x[1], reverse=True)
+for word_id, importance in most_importances[:20]:
+    print("{} ({})".format(vectorizer.get_feature_names()[word_id], importance))
 
 
