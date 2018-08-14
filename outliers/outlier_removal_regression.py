@@ -26,7 +26,11 @@ ages_train, ages_test, net_worths_train, net_worths_test = train_test_split(ages
 ### fill in a regression here!  Name the regression object reg so that
 ### the plotting code below works, and you can see what your regression looks like
 
-
+from sklearn.linear_model import LinearRegression
+reg = LinearRegression()
+reg.fit(ages_train, net_worths_train)
+print("Slope: {}".format(reg.coef_[0][0]))
+print("Testing score: {}".format(reg.score(ages_test, net_worths_test)))
 
 
 
@@ -73,6 +77,10 @@ if len(cleaned_data) > 0:
         print "you don't seem to have regression imported/created,"
         print "   or else your regression object isn't named reg"
         print "   either way, only draw the scatter plot of the cleaned data"
+
+    print("Intercept: {}".format(reg.intercept_[0]))
+    print("Slope: {}".format(reg.coef_[0][0]))
+    print("Testing score: {}".format(reg.score(ages_test, net_worths_test)))
     plt.scatter(ages, net_worths)
     plt.xlabel("ages")
     plt.ylabel("net worths")
