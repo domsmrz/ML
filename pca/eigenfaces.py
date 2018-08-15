@@ -98,6 +98,7 @@ param_grid = {
 # for sklearn version 0.16 or prior, the class_weight parameter value is 'auto'
 clf = GridSearchCV(SVC(kernel='rbf', class_weight='balanced'), param_grid)
 clf = clf.fit(X_train_pca, y_train)
+print "Selected parameters", clf.best_params_
 print "done in %0.3fs" % (time() - t0)
 print "Best estimator found by grid search:"
 print clf.best_estimator_
