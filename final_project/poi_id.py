@@ -17,11 +17,11 @@ class UnknownGuesser(object):
         self.no_poi_means = None
         self.no_poi_stds = None
 
-        self.miss_prob = 0.5
+        self.miss_prob = 0.3
         #self.poi_clones = 300
         #self.no_poi_clones = 100
-        self.poi_clones = 2
-        self.no_poi_clones = 10
+        self.poi_clones = 500
+        self.no_poi_clones = 1
 
     def fit(self, X, y):
         pois = X[y]
@@ -66,9 +66,9 @@ class UnknownGuesser(object):
                     if not np.isnan(value):
                         data_point.append(value)
                     else:
-                        if False:
+                        if True:
+                        #if np.random.rand() < 0.9999:
                             # TODO
-                        #if np.random.rand() < 0.2:
                             data_point.append(np.random.normal(poi_mean, poi_std))
                         else:
                             data_point.append(np.random.normal(no_poi_mean, no_poi_std))
@@ -84,14 +84,11 @@ class UnknownGuesser(object):
 features_list = [
     'poi',
     'bonus',
-    'deferral_payments',
-    'deferred_income',
     'exercised_stock_options',
     'expenses',
     'from_messages',
     'from_poi_to_this_person',
     'from_this_person_to_poi',
-    'long_term_incentive',
     'other',
     'poi_from_ratio',
     'poi_to_ratio',
@@ -101,10 +98,6 @@ features_list = [
     'to_messages',
     'total_payments',
     'total_stock_value',
-]
-features_list = [
-    'poi_from_ratio',
-    'poi_to_ratio',
 ]
 
 ### Load the dictionary containing the dataset
@@ -173,7 +166,7 @@ from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.preprocessing import scale
 from sklearn.decomposition import PCA
 
-kf = model_selection.StratifiedKFold(n_splits=4, shuffle=True, random_state=22)
+kf = model_selection.StratifiedKFold(n_splits=5, shuffle=True, random_state=22)
 eps = 0.0000001
 working_features = np.log2(np.abs(working_features) + eps)
 for train_index, test_index in kf.split(working_features, working_labels):
@@ -186,16 +179,16 @@ for train_index, test_index in kf.split(working_features, working_labels):
 
     train_features = scale(train_features)
 
-    #pca = PCA(n_components=2)
-    #pca.fit(train_features)
-    #train_features = pca.transform(train_features)
+    pca = PCA(n_components=15)
+    pca.fit(train_features)
+    train_features = pca.transform(train_features)
 
     #lda = LinearDiscriminantAnalysis(n_components=2)
     #lda.fit(train_features, train_labels)
     #train_features = lda.transform(train_features)
 
-    #clf = DecisionTreeClassifier()
-    clf = SVC(probability=True)
+    clf = DecisionTreeClassifier()
+    #clf = SVC(probability=True)
     clf.fit(train_features, train_labels)
 
 
@@ -203,8 +196,8 @@ for train_index, test_index in kf.split(working_features, working_labels):
     test_features = working_features[train_index]
     test_labels = working_labels[train_index]
 
-    #raw_pred = clf.predict_proba((ug.transform_without_labels(test_features)))[:,1]
-    raw_pred = clf.predict_proba((scale(ug.transform_without_labels(test_features))))[:,1]
+    raw_pred = clf.predict(pca.transform(scale(ug.transform_without_labels(test_features))))
+    #raw_pred = clf.predict_proba(pca.transform(scale(ug.transform_without_labels(test_features))))[:,1]
     pred = []
     for i in range(len(test_labels)):
         relevant = raw_pred[i*1000:(i+1)*1000]
@@ -219,6 +212,7 @@ for train_index, test_index in kf.split(working_features, working_labels):
     print("Precision: {}".format(sklearn.metrics.precision_score(test_labels, pred)))
 
 
+    #points = pca.transform(scale(ug.transform_without_labels(test_features)))
     #plt.scatter(points[test_labels,0], points[test_labels,1], c='r')
     #plt.scatter(points[np.logical_not(test_labels),0], points[np.logical_not(test_labels),1], c='g')
     #plt.show()
